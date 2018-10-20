@@ -77,27 +77,26 @@ defmodule Money2020.Messenger do
     message =
       messaging
       |> get_message
-      |> hd
 
     recipient =
       messaging
-      |> Enum.map(fn m -> m |> get_recipient end)
-      |> hd
+      |> get_recipient
 
     sender =
       messaging
-      |> Enum.map(fn m -> m |> get_sender end)
-      |> hd
+      |> get_sender
 
-    sender.id |> IO.inspect()
-    recipient = %{"id" => sender.id}
+    {message.text, sender.id}
+  end
 
+  def send_message(sender_id, message_text) do
     params = %{
       access_token:
         "EAAfBV7upiPsBALJHqTOo9nNAvDQHZAMBobxZCEOjgbR7ULEqPP24vZBDtzi3TubuNMUHxLx6LmakdxO6fCb2YOYhMh749gFWjG4cAK5hLHhbM7fw1BKtsCcRmzuzHbdqcrnYn7T9zeccZBj7kxPTeDZClIs8cmyZA8E9uEZBZBcOxQZDZD"
     }
 
-    response_message = %{"text" => "test response"}
+    recipient = %{"id" => sender_id}
+    response_message = %{"text" => message_text}
     request_body = %{"recipient" => recipient, "message" => response_message}
     encoded_req_body = Poison.encode!(request_body)
 

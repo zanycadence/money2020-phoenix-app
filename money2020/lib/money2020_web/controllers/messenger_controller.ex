@@ -13,13 +13,15 @@ defmodule Money2020Web.MessengerController do
   end
 
   def webhook_post(conn, %{"entry" => entries, "object" => object} = params) do
-    params |> IO.inspect()
-
     {response_text, status_code} =
       case object do
         "page" ->
-          entries
-          |> Enum.map(fn e -> e |> Messenger.extract_messages() end)
+          {message, sender_id} =
+            entries
+            |> Enum.map(fn e -> e |> Messenger.extract_messages() end)
+            |> hd
+
+          Messenger.send_message(sender_id, "sample response")
 
           {"EVENT_RECEIVED", 200}
 
