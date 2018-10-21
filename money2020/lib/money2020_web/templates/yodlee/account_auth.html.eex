@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Yodlee account auth</title>
+    </head>
+    <body>
+        <form action="https://node.developer.yodlee.com/authenticate/restserver/" method="POST">
+            <input type="text" name="app" value="10003600" />
+            <input type="text" name="rsession" value="<%= @user_session %>" />
+            <input type="text" name="token" value="<%= @access_token %>" />
+            <input type="text" name="redirectReq" value="true"/>
+            <input type="text" id="extraParams" name="extraParams" value="callback=https://www.google.com"/>
+            <input type="submit" name="submit" />
+        </form>
+    </body>
+
+</html>
