@@ -88,4 +88,25 @@ defmodule Money2020.Yodlee do
     |> Map.get("value")
     |> IO.inspect()
   end
+
+  def get_transaction_data(cobrand_session, user_session) do
+    headers = [
+      {"Content-Type", "application/json"},
+      {"Api-Version", "1.1"},
+      {"Authorization", "cobSession=" <> cobrand_session <> ",userSession=" <> user_session},
+      {"Cobrand-name", "restserver"}
+    ]
+
+    request_body = %{}
+    encoded_req_body = Poison.encode!(request_body)
+
+    yodlee_response =
+      HTTPoison.get!(
+        yodlee_endpoint() <> "/transactions",
+        headers
+      )
+
+    yodlee_response.body
+    |> Poison.decode!()
+  end
 end

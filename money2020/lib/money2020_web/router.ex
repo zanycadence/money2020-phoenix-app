@@ -21,6 +21,7 @@ defmodule Money2020Web.Router do
     get("/webhook", MessengerController, :webhook)
     post("/webhook", MessengerController, :webhook_post)
     get("/yodlee_auth", YodleeController, :yodlee_auth)
+    get("/account_success", YodleeController, :account_success)
   end
 
   scope "/api", Money2020Web do

@@ -12,4 +12,11 @@ defmodule Money2020Web.YodleeController do
     |> assign(:access_token, access_token)
     |> render("account_auth.html")
   end
+
+  def account_success(conn, params) do
+    params |> IO.inspect()
+
+    conn
+    |> render("account_success.html")
+  end
 end
