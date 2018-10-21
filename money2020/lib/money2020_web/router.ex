@@ -9,6 +9,10 @@ defmodule Money2020Web.Router do
     # plug(Money2020.Plugs.Auth, [])
   end
 
+  pipeline :api do
+    plug(:accepts, ["json"])
+  end
+
   scope "/", Money2020Web do
     # Use the default browser stack
     pipe_through(:browser)
@@ -18,10 +22,13 @@ defmodule Money2020Web.Router do
     post("/webhook", MessengerController, :webhook_post)
     post("/bots/sms", BotController, :on_sms)
     get("/register", YodleeController, :yodlee_auth)
+    get("/summary", YodleeController, :summary)
+
     get("/account_success", YodleeController, :account_success)
   end
 
   scope "/api", Money2020Web do
     pipe_through(:api)
+    get("/summary_results", YodleeController, :summary_results)
   end
 end
