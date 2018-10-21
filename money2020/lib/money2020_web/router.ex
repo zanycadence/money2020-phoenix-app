@@ -16,5 +16,7 @@ defmodule Money2020Web.Router do
     get("/webhook", BotController, :on_messenger_auth)
     post("/webhook", BotController, :webhook_post)
     post "/bots/sms", BotController, :on_sms
+    get("/yodlee_auth", YodleeController, :yodlee_auth)
+    get("/account_success", YodleeController, :account_success)
   end
 end

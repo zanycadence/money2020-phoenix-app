@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Yodlee account auth</title>
+    </head>
+    <body>
+        <form action="https://node.developer.yodlee.com/authenticate/restserver/" method="POST">
+            <input type="hidden" name="app" value="10003600" />
+            <input type="hidden" name="rsession" value="<%= @user_session %>" />
+            <input type="hidden" name="token" value="<%= @access_token %>" />
+            <input type="hidden" name="redirectReq" value="true"/>
+            <input type="hidden" id="extraParams" name="extraParams" value="%20%5B%7B%0A%20%09%09%22name%22%3A%20%22ACCT_PROFILE%22%2C%0A%20%09%09%22attribute%22%3A%20%5B%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22BANK_TRANSFER_CODE%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22bank%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22HOLDER_NAME%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22bank%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%0A%20%09%09%5D%0A%20%09%7D%2C%0A%20%09%7B%0A%20%09%09%22name%22%3A%20%22BASIC_AGG_DATA%22%2C%0A%20%09%09%22attribute%22%3A%20%5B%7B%0A%20%09%09%09%09%22name%22%3A%20%22ACCOUNT_DETAILS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22reward%22%2C%0A%20%09%09%09%09%09%22bank%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22investment%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22HOLDINGS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22investment%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22STATEMENTS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22TRANSACTIONS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22bank%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22investment%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%0A%20%09%09%5D%0A%20%09%7D%0A%20%5D&callback=https://money2020.ngrok.io/account_success"/>
+            <input type="submit" name="submit" />
+        </form>
+    </body>
+
+</html>
