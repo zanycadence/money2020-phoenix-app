@@ -106,7 +106,46 @@ defmodule Money2020.Messenger do
       [{"Content-Type", "application/json"}],
       params: params
     ) do
-      result -> IO.inspect result
+      result -> result
+    end
+  end
+
+  def send_image(sender_id, title, subtitle, image_url) do
+    message_body = %{"attachment" => %{
+        "type" => "template",
+        "payload" => %{
+          "template_type" => "generic",
+          "elements" => [%{
+            "title" => title,
+            "subtitle" => subtitle,
+            "item_url" => "http://money2020.ngrok.io",               
+            "image_url" => image_url,
+            "buttons" => [%{
+              "type" => "web_url",
+              "url" => "http://money2020.ngrok.io",
+              "title" => "details"
+            }],
+          }]
+        }
+      }
+    }
+    
+    params = %{
+      access_token:
+        "EAAfBV7upiPsBALJHqTOo9nNAvDQHZAMBobxZCEOjgbR7ULEqPP24vZBDtzi3TubuNMUHxLx6LmakdxO6fCb2YOYhMh749gFWjG4cAK5hLHhbM7fw1BKtsCcRmzuzHbdqcrnYn7T9zeccZBj7kxPTeDZClIs8cmyZA8E9uEZBZBcOxQZDZD"
+    }
+
+    recipient = %{"id" => sender_id}
+    request_body = %{"recipient" => recipient, "message" => message_body}
+    encoded_req_body = Poison.encode!(request_body)
+
+    case HTTPoison.post!(
+      "https://graph.facebook.com/v2.6/me/messages",
+      encoded_req_body,
+      [{"Content-Type", "application/json"}],
+      params: params
+    ) do
+      result -> result
     end
   end
 end

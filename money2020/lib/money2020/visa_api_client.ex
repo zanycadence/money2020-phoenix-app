@@ -18,7 +18,8 @@ defmodule Money2020.VisaApiClient do
     def process_request_headers(headers) do
         [ { "Authorization", "Basic Tk9GT0lVNU5NMTlMR0hXRjhVSEIyMTdtSGtFbjh4OW16aHBOaldVeU04NHFYN3ZkMDoyTFVPQjJPRGQ5QnBVN2NTSjZSODlOQ2U3"} 
         | [ {"Content-Type", "application/json"}
-        | headers ] ]
+        | [ {"Accept", "application/json"} 
+        | headers ] ] ]
     end
 
     def process_response_body(body) do

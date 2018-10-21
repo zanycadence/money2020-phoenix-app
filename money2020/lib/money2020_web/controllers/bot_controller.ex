@@ -4,21 +4,32 @@ defmodule Money2020Web.BotController do
     alias Money2020.TwilioHelper
     alias Money2020.Messenger
 
+    # \xF0\x9F\x92\xB3
+    @card_emoji_string <<240, 159, 146, 179>>
+    @siren_emoji_string <<240, 159, 154, 168>>
+    @checkmark_emoji <<226, 156, 133>>
+    @bookkeeping <<133, 159, 147, 145>>
+    @processing <<0xE2, 0x8F, 0xB3>>
+
     @help_message_1 """
-      Use one of the available commands
-      listed below and replace the place holders
-      with your information
-      """
+        With Locale you can seemlessly pay to participating local businesses and support your community.
+        Available commands
+        """
 
-    @help_message_2 """
-      pay
-      to: {recipient nickname}
-      amount: {in us dollars}
-
-      register
-      full name: {}
-      card number: {}
-      """
+    def help_message_2() do 
+        
+        """
+        register
+        full name: ##
+        card number: #{@card_emoji_string}
+        
+        pay
+        to: {Locale nickname}
+        amount: {in us dollars}
+        
+        local offers
+        """
+    end
 
     def webhook_post(conn, %{"entry" => entries, "object" => object} = params) do
       case object do
@@ -34,11 +45,13 @@ defmodule Money2020Web.BotController do
   end
 
     def on_messenger(conn, assigns) do
-        dispatch conn, assigns, :messenger
+        conn = assign(conn, :bot, :messenger)
+        dispatch conn, assigns
     end
 
     def on_sms(conn, assigns) do
-        dispatch conn, assigns, :sms
+        conn = assign(conn, :bot, :sms)
+        dispatch conn, assigns
     end
 
     def parse_body(body) do
@@ -51,14 +64,18 @@ defmodule Money2020Web.BotController do
                 { :register, Regex.run(~r/(.*)full name:(?<to>.*)card number:(?<card>.*)/, body, capture: :all_names) }
             ["pay" | _rest ] ->
                 { :pay, Regex.run(~r/(.*)to:(?<to>.*)amount:(?<amount>.*)/, body, capture: :all_names) }
+            ["local" | ["offers" | _rest] ] ->
+                :local_offers
             [] ->
-                :error
+                :format_error
+            [_unknown] ->
+                :format_error
         end
     end
 
-    defp dispatch(conn, input, bot) do
+    defp dispatch(conn, input) do
         body = Map.get(input, "Body")
-        user_id = case bot do
+        user_id = case conn.assigns.bot do
           :sms -> Map.get(input, "From") |> String.slice(1..-1)
           :messenger -> Map.get(input, "From")
         end
@@ -66,61 +83,103 @@ defmodule Money2020Web.BotController do
         
         case parse_body(body) do
             { _any, nil } ->
-                bot_message(conn, "format error", bot)
+                bot_message(conn, @siren_emoji_string <> " Invalid format, the help messages are out!")
+                bot_message(conn, @help_message_1)
+                bot_message(conn, help_message_2())
             { :help, assigns } ->
-                bot_message(conn, @help_message_1, bot)
-                bot_message(conn, @help_message_2, bot)
+                bot_message(conn, @help_message_1)
+                bot_message(conn, help_message_2())
             { :register, assigns } ->
                 [name, card_number] = assigns
-                bot_message(conn, "Your registration request is being processed", bot)
-                register conn, name, card_number, bot
+                bot_message(conn, @processing <> " Your registration request is being processed")
+                register conn, name, card_number
             { :pay, assigns } ->
                 [to, amount] = assigns
-                bot_message(conn, "your payment is being processed", bot)
-                pay conn, to, amount, bot
+                bot_message(conn, @processing <> " Your payment is being processed")
+                pay conn, to, amount
+            :local_offers ->
+                %{category: category, image_url: image_url, program: program, title: title } =
+                    VisaHelper.offers()
+                bot_message(conn, image_url)
+                case conn.assigns.bot do
+                    :messenger ->
+                        Messenger.send_image(conn.assigns.user_id, program, (category <> " " <> title), image_url)
+                    :sms ->
+                        offer_message = 
+                            """
+                            #{title}
+                            #{category}
+                            program - local business support
+                            """
+                        bot_message(conn, offer_message)
+                end
+            :format_error ->
+                bot_message(conn, @siren_emoji_string <> " Invalid format, help is on the way")
+                bot_message(conn, @help_message_1)
+                bot_message(conn, help_message_2())
         end
 
         conn
-          |> assign(:response, "cool")
           |> render("status.html")
     end
 
-    defp register(conn, name, card_number, bot) do
-        case VisaHelper.register(conn.assigns.user_id) do
-            { :ok, %{ body: [message: message, reason: reason]}} ->
-                bot_message(conn, String.slice(message, 9..-1), bot)
-            { :ok, %{ body: body } } ->
+    defp register(conn, name, card_number) do
+        { user_id, alias_type } = 
+            if conn.assigns.bot == :sms do
+                { conn.assigns.user_id, "01" }
+            else
+                { random_string(15) <> "@gmail.com", "02" }
+            end
+        case VisaHelper.register(user_id, alias_type) do
+            %{ body: body, status_code: 400 } ->
+                message = Enum.filter(body, 
+                    fn { k, v } ->
+                        :message == k
+                    end) |> List.first |> (fn {_, v} -> v end).()
+                bot_message(conn, String.slice(message, 9..-1))
+            %{ body: body } ->
+                bot_message(conn, @checkmark_emoji <> "Your registration was completed successfully, use your phone number/email to recieve payments from others!")
+            error ->
+                IO.inspect error
+        end
+        conn
+    end
+
+    defp pay(conn, to, amount) do
+        { user_id, alias_type } = 
+            if conn.assigns.bot == :sms do
+                { conn.assigns.user_id, "01" }
+            else
+                { random_string(15) <> "@gmail.com", "02" }
+            end
+        case VisaHelper.pay(user_id, to, amount) do
+            %{ body: body, status_code: 400 } ->
+                message = Enum.filter(body, 
+                    fn { k, v } ->
+                        :message == k
+                    end) |> List.first |> (fn {_, v} -> v end).()
+                bot_message(conn, String.slice(message, 9..-1))
+            %{ body: body } ->
                 IO.inspect body
-                bot_message(conn, "Your registration was completed successfully, use your phone number/email to recieve payments from others!", bot)
+                id = Enum.filter(body, 
+                    fn { k, v } ->
+                        :transactionIdentifier == k
+                    end) |> List.first |> (fn {_, v} -> v end).() |> to_string()
+                bot_message(conn,  @checkmark_emoji <> "Your payment was completed successfully, transaction id: " <> id <> @bookkeeping)
             error ->
                 IO.inspect error
         end
         conn
     end
 
-    defp pay(conn, to, amount, bot) do
-        case VisaHelper.pay(conn.assigns.user_id, to, amount) do
-            { :ok, %{ body: %{message: message, reason: reason}}} ->
-                bot_render conn, "status", %{message: String.slice(message, 9..-1)}, bot
-            { :ok, response } ->
-                IO.inspect response
-                bot_message(conn, "Your payment was completed successfully!", bot)
-            error ->
-                IO.inspect error
-        end
-        conn
-    end
-
-    defp bot_message(conn, message, bot) do
-      case bot do
+    defp bot_message(conn, message) do
+      case conn.assigns.bot do
         :sms -> TwilioHelper.send_sms(conn.assigns.user_id, message)
         :messenger -> Messenger.send_message(conn.assigns.user_id, message)
       end
     end
 
-    defp bot_render(conn, template, assigns, bot) do
-      conn
-      |> assign(:response, "cool")
-      |> render("status.html")
+    def random_string(length) do
+        :crypto.strong_rand_bytes(length) |> Base.url_encode64 |> binary_part(0, length)
     end
 end
