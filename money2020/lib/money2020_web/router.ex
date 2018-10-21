@@ -2,15 +2,11 @@ defmodule Money2020Web.Router do
   use Money2020Web, :router
 
   pipeline :browser do
-    plug(:accepts, ["html"])
+    plug(:accepts, ["html", "json"])
     plug(:fetch_session)
     plug(:fetch_flash)
-    # plug(:protect_from_forgery) it's a hackathon
     plug(:put_secure_browser_headers)
-  end
-
-  pipeline :api do
-    plug(:accepts, ["json"])
+    plug Money2020.Plugs.Auth, []
   end
 
   scope "/", Money2020Web do
@@ -20,9 +16,6 @@ defmodule Money2020Web.Router do
     get("/", PageController, :index)
     get("/webhook", MessengerController, :webhook)
     post("/webhook", MessengerController, :webhook_post)
-  end
-
-  scope "/api", Money2020Web do
-    pipe_through(:api)
+    post "/bots/sms", BotController, :on_sms
   end
 end
