@@ -6,7 +6,7 @@ defmodule Money2020Web.Router do
     plug(:fetch_session)
     plug(:fetch_flash)
     plug(:put_secure_browser_headers)
-    plug(Money2020.Plugs.Auth, [])
+    # plug(Money2020.Plugs.Auth, [])
   end
 
   scope "/", Money2020Web do
