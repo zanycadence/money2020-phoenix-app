@@ -2,6 +2,36 @@ defmodule Money2020Web.BotController do
     use Money2020Web, :controller
     alias Money2020.VisaHelper
     alias Money2020.TwilioHelper
+    alias Money2020.Messenger
+
+    @help_message_1 """
+      Use one of the available commands
+      listed below and replace the place holders
+      with your information
+      """
+
+    @help_message_2 """
+      pay
+      to: {recipient nickname}
+      amount: {in us dollars}
+
+      register
+      full name: {}
+      card number: {}
+      """
+
+    def webhook_post(conn, %{"entry" => entries, "object" => object} = params) do
+      case object do
+        "page" ->
+          {message, sender_id} =
+            entries
+            |> Enum.map(fn e -> e |> Messenger.extract_messages() end)
+            |> hd
+
+            on_messenger(conn, %{ "Body" => message, "From" => sender_id })
+      end
+
+  end
 
     def on_messenger(conn, assigns) do
         dispatch conn, assigns, :messenger
@@ -27,41 +57,42 @@ defmodule Money2020Web.BotController do
     end
 
     defp dispatch(conn, input, bot) do
-        body = 
-            case bot do
-                :sms -> Map.get(input, "Body")
-                :messenger -> Map.get(input, "body")
-            end
+        body = Map.get(input, "Body")
+        user_id = case bot do
+          :sms -> Map.get(input, "From") |> String.slice(1..-1)
+          :messenger -> Map.get(input, "From")
+        end
+        conn = assign(conn, :user_id, user_id)
+        
         case parse_body(body) do
             { _any, nil } ->
-                bot_render conn, "format_error", %{}, bot
+                bot_message(conn, "format error", bot)
             { :help, assigns } ->
-                bot_render conn, "help", %{}, bot
+                bot_message(conn, @help_message_1, bot)
+                bot_message(conn, @help_message_2, bot)
             { :register, assigns } ->
                 [name, card_number] = assigns
-                conn = bot_render conn, "status", %{ message: "your registration request is being processed " }, bot
+                bot_message(conn, "Your registration request is being processed", bot)
                 register conn, name, card_number, bot
             { :pay, assigns } ->
                 [to, amount] = assigns
-                conn = bot_render conn, "status", %{ message: "your payment is being processed " }, bot
+                bot_message(conn, "your payment is being processed", bot)
                 pay conn, to, amount, bot
         end
+
+        conn
+          |> assign(:response, "cool")
+          |> render("status.html")
     end
 
     defp register(conn, name, card_number, bot) do
         case VisaHelper.register(conn.assigns.user_id) do
             { :ok, %{ body: [message: message, reason: reason]}} ->
-                IO.puts "failure occured"
-                IO.puts message
-                TwilioHelper.send_sms(conn.assigns.user_id, String.slice(message, 9..-1))
+                bot_message(conn, String.slice(message, 9..-1), bot)
             { :ok, %{ body: body } } ->
                 IO.inspect body
-                case bot do
-                    :sms -> TwilioHelper.send_sms(conn.assigns.user_id, "Your registration was completed successfully, use your phone number to recieve payments from others!")
-                    :messenger -> MessengerHelper.send_message(conn.assigns.user_id, "Your registration was completed successfully, use your email registered with facebook to recieve payments from others!")
-                end
+                bot_message(conn, "Your registration was completed successfully, use your phone number/email to recieve payments from others!", bot)
             error ->
-                IO.puts "loool"
                 IO.inspect error
         end
         conn
@@ -70,28 +101,26 @@ defmodule Money2020Web.BotController do
     defp pay(conn, to, amount, bot) do
         case VisaHelper.pay(conn.assigns.user_id, to, amount) do
             { :ok, %{ body: %{message: message, reason: reason}}} ->
-                IO.puts "failure occured"
-                IO.puts message
                 bot_render conn, "status", %{message: String.slice(message, 9..-1)}, bot
             { :ok, response } ->
                 IO.inspect response
-                case bot do
-                    :sms -> TwilioHelper.send_sms(conn.assigns.user_id, "Your payment was completed successfully!")
-                    :messenger -> MessengerHelper.send_message(conn.assigns.user_id, "Your payment was completed successfully!")
-                end
+                bot_message(conn, "Your payment was completed successfully!", bot)
             error ->
-                IO.puts "loool"
                 IO.inspect error
         end
         conn
     end
 
+    defp bot_message(conn, message, bot) do
+      case bot do
+        :sms -> TwilioHelper.send_sms(conn.assigns.user_id, message)
+        :messenger -> Messenger.send_message(conn.assigns.user_id, message)
+      end
+    end
+
     defp bot_render(conn, template, assigns, bot) do
-        format = 
-            case bot do
-                :sms -> ".xml"
-                :messenger -> ".json"
-            end
-        render conn, (template <> format), assigns
+      conn
+      |> assign(:response, "cool")
+      |> render("status.html")
     end
 end

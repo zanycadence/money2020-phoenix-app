@@ -6,7 +6,6 @@ defmodule Money2020Web.Router do
     plug(:fetch_session)
     plug(:fetch_flash)
     plug(:put_secure_browser_headers)
-    plug Money2020.Plugs.Auth, []
   end
 
   scope "/", Money2020Web do
@@ -14,8 +13,8 @@ defmodule Money2020Web.Router do
     pipe_through(:browser)
 
     get("/", PageController, :index)
-    get("/webhook", MessengerController, :webhook)
-    post("/webhook", MessengerController, :webhook_post)
+    get("/webhook", BotController, :on_messenger_auth)
+    post("/webhook", BotController, :webhook_post)
     post "/bots/sms", BotController, :on_sms
   end
 end

@@ -100,11 +100,13 @@ defmodule Money2020.Messenger do
     request_body = %{"recipient" => recipient, "message" => response_message}
     encoded_req_body = Poison.encode!(request_body)
 
-    HTTPoison.post!(
+    case HTTPoison.post!(
       "https://graph.facebook.com/v2.6/me/messages",
       encoded_req_body,
       [{"Content-Type", "application/json"}],
       params: params
-    )
+    ) do
+      result -> IO.inspect result
+    end
   end
 end
