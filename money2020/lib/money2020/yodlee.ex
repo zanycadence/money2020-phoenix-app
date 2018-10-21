@@ -19,6 +19,10 @@ defmodule Money2020.Yodlee do
     defstruct [:amount]
   end
 
+  defmodule Tally do
+    defstruct [:groceries, :auto, :transfers, :deposits, :interest, :service, :atm, :check]
+  end
+
   def get_cobrand_session() do
     headers = [
       {"Content-Type", "application/json"},
@@ -118,6 +122,66 @@ defmodule Money2020.Yodlee do
     |> Poison.decode!()
     |> Map.get("transaction")
     |> Enum.map(fn t -> t |> get_transaction_map end)
+    |> tally_transactions(%Tally{
+      groceries: 0,
+      auto: 0,
+      transfers: 0,
+      deposits: 0,
+      interest: 0,
+      service: 0,
+      atm: 0,
+      check: 0
+    })
+  end
+
+  def tally_transactions(
+        [h | t],
+        %{
+          groceries: groceries,
+          auto: auto,
+          transfers: transfers,
+          deposits: deposits,
+          interest: interest,
+          service: service,
+          atm: atm,
+          check: check
+        } = acc
+      ) do
+    acc =
+      case h.category do
+        "Groceries" ->
+          %{acc | groceries: groceries + h.amount}
+
+        "Automotive/Fuel" ->
+          %{acc | auto: auto + h.amount}
+
+        "Transfers" ->
+          %{acc | transfers: transfers + h.amount}
+
+        "Deposits" ->
+          %{acc | deposits: deposits + h.amount}
+
+        "Interest Income" ->
+          %{acc | interest: interest + h.amount}
+
+        "Service Charges/Fees" ->
+          %{acc | service: service + h.amount}
+
+        "ATM/Cash Withdrawals" ->
+          %{acc | atm: atm + h.amount}
+
+        "Check Payment" ->
+          %{acc | check: check + h.amount}
+
+        _ ->
+          acc
+      end
+
+    tally_transactions(t, acc)
+  end
+
+  def tally_transactions([], acc) do
+    acc
   end
 
   defp get_transaction_map(transaction) do
