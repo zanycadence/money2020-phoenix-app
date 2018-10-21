@@ -44,7 +44,25 @@ defmodule Money2020.Yodlee do
     yodlee_response.body |> Poison.decode!() |> Map.get("session") |> Map.get("cobSession")
   end
 
-  def get_user_session(cobrand_session) do
+  defmodule Yodlee_user do
+    defstruct [:loginName, :password]
+  end
+
+  def user_1 do
+    %Yodlee_user{
+      loginName: "sbMemd45f4de596b1f03301bc53114f46e9b2da2",
+      password: "sbMemd45f4de596b1f03301bc53114f46e9b2da2#123"
+    }
+  end
+
+  def user_2 do
+    %Yodlee_user{
+      loginName: "sbMemd45f4de596b1f03301bc53114f46e9b2da3",
+      password: "sbMemd45f4de596b1f03301bc53114f46e9b2da3#123"
+    }
+  end
+
+  def get_user_session(cobrand_session, user \\ user_1()) do
     headers = [
       {"Content-Type", "application/json"},
       {"Api-Version", "1.1"},
@@ -53,8 +71,8 @@ defmodule Money2020.Yodlee do
     ]
 
     user = %{
-      "loginName" => "sbMemd45f4de596b1f03301bc53114f46e9b2da2",
-      "password" => "sbMemd45f4de596b1f03301bc53114f46e9b2da2#123",
+      "loginName" => user.loginName,
+      "password" => user.password,
       "locale" => "en_US"
     }
 
