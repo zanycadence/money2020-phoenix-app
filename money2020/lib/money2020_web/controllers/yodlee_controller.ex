@@ -19,4 +19,10 @@ defmodule Money2020Web.YodleeController do
     conn
     |> render("account_success.html")
   end
+
+  def account_summary(conn, params) do
+    params |> IO.inspect()
+    conn
+    |> render("account_summary.html")
+  end
 end

@@ -18,5 +18,6 @@ defmodule Money2020Web.Router do
     post "/bots/sms", BotController, :on_sms
     get("/yodlee_auth", YodleeController, :yodlee_auth)
     get("/account_success", YodleeController, :account_success)
+    get("/account_summary", YodleeController, :account_summary)
   end
 end
