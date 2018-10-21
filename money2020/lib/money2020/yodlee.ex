@@ -11,6 +11,18 @@ defmodule Money2020.Yodlee do
     "https://developer.api.yodlee.com/ysl/"
   end
 
+  defmodule Transaction do
+    defstruct [:amount, :category, :category_type]
+  end
+
+  defmodule Amount do
+    defstruct [:amount]
+  end
+
+  defmodule Tally do
+    defstruct [:groceries, :auto, :transfers, :deposits, :interest, :service, :atm, :check]
+  end
+
   def get_cobrand_session() do
     headers = [
       {"Content-Type", "application/json"},
@@ -32,7 +44,25 @@ defmodule Money2020.Yodlee do
     yodlee_response.body |> Poison.decode!() |> Map.get("session") |> Map.get("cobSession")
   end
 
-  def get_user_session(cobrand_session) do
+  defmodule Yodlee_user do
+    defstruct [:loginName, :password]
+  end
+
+  def user_1 do
+    %Yodlee_user{
+      loginName: "sbMemd45f4de596b1f03301bc53114f46e9b2da2",
+      password: "sbMemd45f4de596b1f03301bc53114f46e9b2da2#123"
+    }
+  end
+
+  def user_2 do
+    %Yodlee_user{
+      loginName: "sbMemd45f4de596b1f03301bc53114f46e9b2da3",
+      password: "sbMemd45f4de596b1f03301bc53114f46e9b2da3#123"
+    }
+  end
+
+  def get_user_session(cobrand_session, user \\ user_1()) do
     headers = [
       {"Content-Type", "application/json"},
       {"Api-Version", "1.1"},
@@ -41,8 +71,8 @@ defmodule Money2020.Yodlee do
     ]
 
     user = %{
-      "loginName" => "sbMemd45f4de596b1f03301bc53114f46e9b2da2",
-      "password" => "sbMemd45f4de596b1f03301bc53114f46e9b2da2#123",
+      "loginName" => user.loginName,
+      "password" => user.password,
       "locale" => "en_US"
     }
 
@@ -102,11 +132,90 @@ defmodule Money2020.Yodlee do
 
     yodlee_response =
       HTTPoison.get!(
-        yodlee_endpoint() <> "/transactions",
+        yodlee_endpoint() <> "/transactions?fromDate=2014-03-21&container=bank",
         headers
       )
 
     yodlee_response.body
     |> Poison.decode!()
+    |> Map.get("transaction")
+    |> Enum.map(fn t -> t |> get_transaction_map end)
+    |> tally_transactions(%Tally{
+      groceries: 0,
+      auto: 0,
+      transfers: 0,
+      deposits: 0,
+      interest: 0,
+      service: 0,
+      atm: 0,
+      check: 0
+    })
+  end
+
+  def tally_transactions(
+        [h | t],
+        %{
+          groceries: groceries,
+          auto: auto,
+          transfers: transfers,
+          deposits: deposits,
+          interest: interest,
+          service: service,
+          atm: atm,
+          check: check
+        } = acc
+      ) do
+    acc =
+      case h.category do
+        "Groceries" ->
+          %{acc | groceries: groceries + h.amount}
+
+        "Automotive/Fuel" ->
+          %{acc | auto: auto + h.amount}
+
+        "Transfers" ->
+          %{acc | transfers: transfers + h.amount}
+
+        "Deposits" ->
+          %{acc | deposits: deposits + h.amount}
+
+        "Interest Income" ->
+          %{acc | interest: interest + h.amount}
+
+        "Service Charges/Fees" ->
+          %{acc | service: service + h.amount}
+
+        "ATM/Cash Withdrawals" ->
+          %{acc | atm: atm + h.amount}
+
+        "Check Payment" ->
+          %{acc | check: check + h.amount}
+
+        _ ->
+          acc
+      end
+
+    tally_transactions(t, acc)
+  end
+
+  def tally_transactions([], acc) do
+    acc
+  end
+
+  defp get_transaction_map(transaction) do
+    category =
+      transaction
+      |> Map.get("category")
+
+    category_type =
+      transaction
+      |> Map.get("categoryType")
+
+    amount =
+      transaction
+      |> Map.get("amount")
+      |> Map.get("amount")
+
+    %Transaction{category: category, category_type: category_type, amount: amount}
   end
 end

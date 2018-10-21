@@ -1,17 +1,82 @@
 <!doctype html>
 <html>
     <head>
-        <title>Yodlee account auth</title>
+        <title>Register your card</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>" >
+        <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     </head>
     <body>
-        <form action="https://node.developer.yodlee.com/authenticate/restserver/" method="POST">
-            <input type="hidden" name="app" value="10003600" />
-            <input type="hidden" name="rsession" value="<%= @user_session %>" />
-            <input type="hidden" name="token" value="<%= @access_token %>" />
-            <input type="hidden" name="redirectReq" value="true"/>
-            <input type="hidden" id="extraParams" name="extraParams" value="%20%5B%7B%0A%20%09%09%22name%22%3A%20%22ACCT_PROFILE%22%2C%0A%20%09%09%22attribute%22%3A%20%5B%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22BANK_TRANSFER_CODE%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22bank%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22HOLDER_NAME%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22bank%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%0A%20%09%09%5D%0A%20%09%7D%2C%0A%20%09%7B%0A%20%09%09%22name%22%3A%20%22BASIC_AGG_DATA%22%2C%0A%20%09%09%22attribute%22%3A%20%5B%7B%0A%20%09%09%09%09%22name%22%3A%20%22ACCOUNT_DETAILS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22reward%22%2C%0A%20%09%09%09%09%09%22bank%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22investment%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22HOLDINGS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22investment%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22STATEMENTS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22TRANSACTIONS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22bank%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22investment%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%0A%20%09%09%5D%0A%20%09%7D%0A%20%5D&callback=https://money2020.ngrok.io/account_success"/>
-            <input type="submit" name="submit" />
-        </form>
+      <section class="section has-background-link">
+        <div class="container">
+          <div class="columns is-centered has-background-link registration-background">
+            <div class="column is-8 ">
+              <div class="columns is-centered has-background-white registration-form">
+                <div class="column is-10">
+                <form action="https://node.developer.yodlee.com/authenticate/restserver/" method="POST">
+                
+                <div class="field">
+                  <label class="label">Name</label>
+                  <div class="control">
+                    <input class="input" type="text" placeholder="First Last" autocomplete="name">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label">Card #:</label>
+                  <div class="control">
+                    <input class="input" type="text" placeholder="Card Number" autocomplete="cc-number">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label">Address:</label>
+                  <div class="control">
+                    <input class="input" type="text" placeholder="Street Address" autocomplete="shipping street-address">
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label class="label">Address 2:</label>
+                  <div class="control">
+                    <input class="input" type="text" placeholder="(optional)">
+                  </div>
+                </div>
+
+                <div class="columns is-mobile">
+                  <div class="column is-7">
+                    <div class="field">
+                      <label class="label">Zip:</label>
+                      <div class="control">
+                        <input class="input" type="text" placeholder="Zip" autocomplete="shipping postal-code">
+                    </div>
+                </div>
+                  </div>
+                  <div class="column is-5">
+                    <div class="field">
+                      <label class="label">State:</label>
+                      <div class="control">
+                        <input class="input" type="text" placeholder="State" autocomplete="shipping region">
+                    </div>
+                  </div>
+                </div>
+                </div>
+
+
+                  <input type="hidden" name="app" value="10003600" />
+                  <input type="hidden" name="rsession" value="<%= @user_session %>" />
+                  <input type="hidden" name="token" value="<%= @access_token %>" />
+                  <input type="hidden" name="redirectReq" value="true"/>
+                  <input type="hidden" id="extraParams" name="extraParams" value="%20%5B%7B%0A%20%09%09%22name%22%3A%20%22ACCT_PROFILE%22%2C%0A%20%09%09%22attribute%22%3A%20%5B%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22BANK_TRANSFER_CODE%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22bank%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22HOLDER_NAME%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22bank%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%0A%20%09%09%5D%0A%20%09%7D%2C%0A%20%09%7B%0A%20%09%09%22name%22%3A%20%22BASIC_AGG_DATA%22%2C%0A%20%09%09%22attribute%22%3A%20%5B%7B%0A%20%09%09%09%09%22name%22%3A%20%22ACCOUNT_DETAILS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22reward%22%2C%0A%20%09%09%09%09%09%22bank%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22investment%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22HOLDINGS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22investment%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22STATEMENTS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%2C%0A%20%09%09%09%7B%0A%20%09%09%09%09%22name%22%3A%20%22TRANSACTIONS%22%2C%0A%20%09%09%09%09%22container%22%3A%20%5B%0A%20%09%09%09%09%09%22insurance%22%2C%0A%20%09%09%09%09%09%22bank%22%2C%0A%20%09%09%09%09%09%22loan%22%2C%0A%20%09%09%09%09%09%22investment%22%2C%0A%20%09%09%09%09%09%22creditCard%22%0A%20%09%09%09%09%5D%0A%20%09%09%09%7D%0A%20%09%09%5D%0A%20%09%7D%0A%20%5D&callback=https://money2020.ngrok.io/account_success"/>
+                  <input type="submit" name="Register" value="Register" class="button is-success" />
+              </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </body>
 
 </html>

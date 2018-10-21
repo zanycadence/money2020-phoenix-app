@@ -1,5 +1,5 @@
 defmodule Money2020.VisaHelper do
-    alias Money2020.VisaApiClient
+  alias Money2020.VisaApiClient
 
     def random_string(length) do
         :crypto.strong_rand_bytes(length) |> Base.url_encode64 |> binary_part(0, length)
