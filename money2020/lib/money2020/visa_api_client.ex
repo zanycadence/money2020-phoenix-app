@@ -25,5 +25,5 @@ defmodule Money2020.VisaApiClient do
         body
         |> Poison.decode!
         |> Enum.map(fn({k, v}) -> {String.to_atom(k), v} end)
-  end
+    end
 end
