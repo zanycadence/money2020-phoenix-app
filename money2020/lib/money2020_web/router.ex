@@ -18,8 +18,8 @@ defmodule Money2020Web.Router do
 
     get("/", PageController, :index)
 
-    get("/webhook", MessengerController, :webhook)
-    post("/webhook", MessengerController, :webhook_post)
+    get("/webhook", BotController, :webhook)
+    post("/webhook", BotController, :webhook_post)
     post("/bots/sms", BotController, :on_sms)
     get("/register", YodleeController, :yodlee_auth)
     get("/summary", YodleeController, :summary)

@@ -8,7 +8,7 @@ defmodule Money2020Web.BotController do
     @card_emoji_string <<240, 159, 146, 179>>
     @siren_emoji_string <<240, 159, 154, 168>>
     @checkmark_emoji <<226, 156, 133>>
-    @bookkeeping <<133, 159, 147, 145>>
+    @bookkeeping <<0xF0, 0x9F, 0x93, 0x91>>
     @processing <<0xE2, 0x8F, 0xB3>>
 
     @help_message_1 """
@@ -61,7 +61,8 @@ defmodule Money2020Web.BotController do
                 { :help, [] }
             ["register" | _rest ] -> 
                 IO.inspect body
-                { :register, Regex.run(~r/(.*)full name:(?<to>.*)card number:(?<card>.*)/, body, capture: :all_names) }
+                # { :register, Regex.run(~r/(.*)full name:(?<to>.*)card number:(?<card>.*)/, body, capture: :all_names) }
+                :register
             ["pay" | _rest ] ->
                 { :pay, Regex.run(~r/(.*)to:(?<to>.*)amount:(?<amount>.*)/, body, capture: :all_names) }
             ["local" | ["offers" | _rest] ] ->
@@ -89,10 +90,11 @@ defmodule Money2020Web.BotController do
             { :help, assigns } ->
                 bot_message(conn, @help_message_1)
                 bot_message(conn, help_message_2())
-            { :register, assigns } ->
-                [name, card_number] = assigns
-                bot_message(conn, @processing <> " Your registration request is being processed")
-                register conn, name, card_number
+            :register ->
+                bot_message(conn, ("Register with FastLink: " <> "https://money2020.ngrok.io/register?from=" <> conn.assigns.user_id))
+                # [user_id] = assigns 
+                # bot_message(conn, @processing <> " Your registration request is being processed")
+                # register conn, name, card_number
             { :pay, assigns } ->
                 [to, amount] = assigns
                 bot_message(conn, @processing <> " Your payment is being processed")
