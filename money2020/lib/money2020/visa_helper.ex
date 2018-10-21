@@ -7,7 +7,7 @@ defmodule Money2020.VisaHelper do
 
     def register(user_alias, alias_type) do
         body = %{
-            "guid" => ("574f4b6a4c2b70472f306f300099515a789092348832455975343637a4d" <> random_string(4)), #3170
+            "guid" => ("574f4b6a4c2b70472f306f300099515a789092348832455975343637a4" <> random_string(5)), #3170
             "recipientFirstName" => "Jamie",
             "recipientMiddleName" => "M",
             "recipientLastName" => "Bakari",
