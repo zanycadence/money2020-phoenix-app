@@ -11,6 +11,14 @@ defmodule Money2020.Yodlee do
     "https://developer.api.yodlee.com/ysl/"
   end
 
+  defmodule Transaction do
+    defstruct [:amount, :category, :category_type]
+  end
+
+  defmodule Amount do
+    defstruct [:amount]
+  end
+
   def get_cobrand_session() do
     headers = [
       {"Content-Type", "application/json"},
@@ -102,11 +110,30 @@ defmodule Money2020.Yodlee do
 
     yodlee_response =
       HTTPoison.get!(
-        yodlee_endpoint() <> "/transactions",
+        yodlee_endpoint() <> "/transactions?fromDate=2014-03-21&container=bank",
         headers
       )
 
     yodlee_response.body
     |> Poison.decode!()
+    |> Map.get("transaction")
+    |> Enum.map(fn t -> t |> get_transaction_map end)
+  end
+
+  defp get_transaction_map(transaction) do
+    category =
+      transaction
+      |> Map.get("category")
+
+    category_type =
+      transaction
+      |> Map.get("categoryType")
+
+    amount =
+      transaction
+      |> Map.get("amount")
+      |> Map.get("amount")
+
+    %Transaction{category: category, category_type: category_type, amount: amount}
   end
 end
